@@ -39,6 +39,7 @@ module sys_top
 	output		  AUDIO_R,
 	output		  AUDIO_SPDIF,
 
+`ifndef NO_HDMI
 	//////////// HDMI //////////
 	output        HDMI_I2C_SCL,
 	inout         HDMI_I2C_SDA,
@@ -55,6 +56,7 @@ module sys_top
 	output        HDMI_TX_VS,
 	
 	input         HDMI_TX_INT,
+`endif /* NO_HDMI */
 
 	//////////// SDR ///////////
 	output [12:0] SDRAM_A,
@@ -223,6 +225,7 @@ always@(posedge clk_sys) begin
 		if(cmd == 'h20) begin
 			cnt <= cnt + 1'd1;
 			if(cnt<8) begin
+`ifndef NO_HDMI
 				case(cnt)
 					0: WIDTH  <= io_din[11:0];
 					1: HFP    <= io_din[11:0];
@@ -233,6 +236,7 @@ always@(posedge clk_sys) begin
 					6: VS     <= io_din[11:0];
 					7: VBP    <= io_din[11:0];
 				endcase
+`endif /* NO_HDMI */
 				if(!cnt) begin
 					cfg_custom_p1 <= 0;
 					cfg_custom_p2 <= 0;
@@ -380,6 +384,7 @@ vip_config vip_config
 /////////////////////////  Lite version  ////////////////////////////////
 
 `ifdef LITE
+`ifndef NO_HDMI
 
 wire [11:0] x;
 wire [11:0] y;
@@ -445,6 +450,8 @@ pattern_vg
 );
 */
 
+`endif /* NO_HDMI */
+
 wire reset;
 sysmem_lite sysmem
 (
@@ -483,6 +490,7 @@ sysmem_lite sysmem
 	.ram2_byteenable(0),
 	.ram2_write(0),
 
+`ifndef NO_HDMI
 	// HDMI frame buffer
 	.vbuf_clk(clk_ctl),
 	.vbuf_address(vbuf_address),
@@ -494,8 +502,10 @@ sysmem_lite sysmem
 	.vbuf_readdata(vbuf_readdata),
 	.vbuf_readdatavalid(vbuf_readdatavalid),
 	.vbuf_read(vbuf_read)
+`endif /* NO_HDMI */
 );
 
+`ifndef NO_HDMI
 wire  [27:0] vbuf_address;
 wire   [7:0] vbuf_burstcount;
 wire         vbuf_waitrequest;
@@ -543,11 +553,12 @@ hdmi_lite hdmi_lite
 	.vbuf_readdatavalid(vbuf_readdatavalid),
 	.vbuf_read(vbuf_read)
 );
-
+`endif /* NO_HDMI */
 `endif
 
 
 /////////////////////////  HDMI output  /////////////////////////////////
+`ifndef NO_HDMI
 
 pll_hdmi pll_hdmi
 (
@@ -671,7 +682,7 @@ i2s i2s
 	.left_chan (audio_l >> !audio_s),
 	.right_chan(audio_r >> !audio_s)
 );
-
+`endif /* NO_HDMI */
 
 /////////////////////////  VGA output  //////////////////////////////////
 
